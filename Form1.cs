@@ -81,10 +81,11 @@ namespace RandomizerPatchApp
 
             }
             string gameFiles = ".\\PatchFiles\\GameFiles";
-            string randoFiles = ".\\PatchFiles\\RandoFiles\\" + gameRegion;
+            string randoFiles = ".\\PatchFiles\\RandoFiles\\";
             Process process = new Process();
             Console.WriteLine("Patching Seeds...");
-            PatchSeedFiles(randoFiles + "\\mod\\seed");
+            PatchSeedFiles(randoFiles, gameRegion);
+            randoFiles = ".\\PatchFiles\\RandoFiles\\" + gameRegion;
             Console.WriteLine("Done.");
 
             //Extract the ISO
@@ -167,12 +168,12 @@ namespace RandomizerPatchApp
             return true;
         }
 
-        static void PatchSeedFiles(string filesPath)
+        static void PatchSeedFiles(string filesPath, string gameRegion)
         {
-            string[] gameFiles = Directory.GetFiles(filesPath);
+            string[] gameFiles = Directory.GetFiles(filesPath + "\\_seeds\\");
             if (gameFiles.Length == 0)
             {
-                Console.WriteLine("No seeds found. Please check your files and directory. Seeds should be placed in .\\PatchFiles\\GameFiles\\mod\\seed");
+                Console.WriteLine("No seeds found. Please check your files and directory. Seeds should be placed in .\\RandoFiles\\_seeds");
                 return;
             }
             foreach (string file in gameFiles)
@@ -187,7 +188,7 @@ namespace RandomizerPatchApp
                     {
                         fileName = fileName.Substring(0, 31); // File name cannot be more than 32 characters in length
                     }
-                    File.WriteAllBytes(filesPath + "\\" + fileName, bytes); // create the new seed file
+                    File.WriteAllBytes(filesPath + "\\" + gameRegion + "\\mod\\seed\\" + fileName, bytes); // create the new seed file
                     File.Delete(file); // Delete the  original file.
                 }
 
