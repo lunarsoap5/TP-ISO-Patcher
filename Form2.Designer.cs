@@ -52,7 +52,7 @@
             this.ClientSize = new System.Drawing.Size(452, 280);
             this.Controls.Add(this.textBox1);
             this.Name = "Form2";
-            this.Text = "Form1";
+            this.Text = "About";
             this.ResumeLayout(false);
             this.PerformLayout();
 

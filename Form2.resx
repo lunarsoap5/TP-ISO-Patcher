@@ -64,12 +64,13 @@
     <value>TP ISO Patcher Version 1.0
 Created By Lunar Soap
 
+For instructions on how to use the software, please view the README.
+
 This program uses a backend that relies on the following projects:
 
 - GCRebuilder, created by bsv798 and forked and updated by Lunar Soap (https://github.com/lunarsoap5/gcrebuilder)
 
 - GeckoLoader, created by JoshuaMK (https://github.com/JoshuaMKW/GeckoLoader)
-
 
 Please check out their respective software releases!</value>
   </data>
