@@ -112,10 +112,10 @@ namespace RandomizerPatchApp
             Console.WriteLine("Successfully patched dol with Gecko Code!");
 
             //Move all of the new game files over to the tempISO directory
-            Console.WriteLine("Copying new game files to game folder...");
             string[] movableFolders = Directory.GetDirectories(gameFiles);
             if (movableFolders.Length != 0)
             {
+                Console.WriteLine("Copying new game files to game folder...");
                 foreach (string folder in movableFolders)
                 {
                     string gameFolder = folder.Substring(gameFiles.Length, (folder.Length - gameFiles.Length));
@@ -126,16 +126,12 @@ namespace RandomizerPatchApp
 
                 }
             }
-            else
-            {
-                Console.WriteLine("No game files found...");
-            }
 
             //Move all of the rando files over to the tempISO dicrectory
-            Console.WriteLine("Copying Randomizer files to game folder...");
             movableFolders = Directory.GetDirectories(randoFiles);
             if (movableFolders.Length != 0)
             {
+                Console.WriteLine("Copying Randomizer files to game folder...");
                 foreach (string folder in movableFolders)
                 {
                     string randoFolder = folder.Substring(randoFiles.Length, (folder.Length - randoFiles.Length));
@@ -145,10 +141,6 @@ namespace RandomizerPatchApp
                     CopyDirectory(folder, randoFolder, true);
 
                 }
-            }
-            else
-            {
-                Console.WriteLine("No Randomizer files found...");
             }
 
             //Re-pack the ISO
@@ -165,6 +157,16 @@ namespace RandomizerPatchApp
             }
             Console.WriteLine("Cleaning Up...");
             System.IO.Directory.Delete(tempISOPath, true); // delete the temp ISO directory once we are done with it.
+            //Delete any seed files patched into the ISO.
+            string[] seedFiles = Directory.GetFiles(randoFiles + "\\mod\\seed\\");
+            if (gameFiles.Length != 0)
+            {
+                foreach (string file in seedFiles)
+                {
+                    File.Delete(file); // Delete the seed file.
+                }
+            }
+            
             return true;
         }
 
@@ -189,7 +191,6 @@ namespace RandomizerPatchApp
                         fileName = fileName.Substring(0, 31); // File name cannot be more than 32 characters in length
                     }
                     File.WriteAllBytes(filesPath + "\\" + gameRegion + "\\mod\\seed\\" + fileName, bytes); // create the new seed file
-                    File.Delete(file); // Delete the  original file.
                 }
 
             }
