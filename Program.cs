@@ -17,7 +17,7 @@ namespace RandomizerPatchApp
             }
             else
             {
-                bool patchStatus = Form1.PatchISO(args[0]);
+                bool patchStatus = Form1.PatchISO(args[0], args[1]);
                 if (patchStatus)
                 {
                     Console.WriteLine("Patching Complete!");

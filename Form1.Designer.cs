@@ -37,19 +37,22 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameFilesTBox = new System.Windows.Forms.TextBox();
+            this.gameFilesLabel = new System.Windows.Forms.Label();
+            this.gameFilesButton = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // isoTBox
             // 
-            this.isoTBox.Location = new System.Drawing.Point(147, 344);
+            this.isoTBox.Location = new System.Drawing.Point(147, 350);
             this.isoTBox.Name = "isoTBox";
             this.isoTBox.Size = new System.Drawing.Size(454, 23);
             this.isoTBox.TabIndex = 2;
             // 
             // PatchButton
             // 
-            this.PatchButton.Location = new System.Drawing.Point(343, 373);
+            this.PatchButton.Location = new System.Drawing.Point(343, 414);
             this.PatchButton.Name = "PatchButton";
             this.PatchButton.Size = new System.Drawing.Size(90, 23);
             this.PatchButton.TabIndex = 3;
@@ -60,7 +63,7 @@
             // isoLabel
             // 
             this.isoLabel.AutoSize = true;
-            this.isoLabel.Location = new System.Drawing.Point(89, 347);
+            this.isoLabel.Location = new System.Drawing.Point(86, 354);
             this.isoLabel.Name = "isoLabel";
             this.isoLabel.Size = new System.Drawing.Size(55, 15);
             this.isoLabel.TabIndex = 6;
@@ -73,7 +76,7 @@
             this.outputTBox.Name = "outputTBox";
             this.outputTBox.ReadOnly = true;
             this.outputTBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.outputTBox.Size = new System.Drawing.Size(593, 274);
+            this.outputTBox.Size = new System.Drawing.Size(593, 307);
             this.outputTBox.TabIndex = 7;
             this.outputTBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -83,7 +86,7 @@
             // 
             // isoButton
             // 
-            this.isoButton.Location = new System.Drawing.Point(607, 344);
+            this.isoButton.Location = new System.Drawing.Point(607, 350);
             this.isoButton.Name = "isoButton";
             this.isoButton.Size = new System.Drawing.Size(75, 23);
             this.isoButton.TabIndex = 10;
@@ -116,11 +119,40 @@
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
+            // gameFilesTBox
+            // 
+            this.gameFilesTBox.Location = new System.Drawing.Point(147, 379);
+            this.gameFilesTBox.Name = "gameFilesTBox";
+            this.gameFilesTBox.Size = new System.Drawing.Size(454, 23);
+            this.gameFilesTBox.TabIndex = 15;
+            // 
+            // gameFilesLabel
+            // 
+            this.gameFilesLabel.AutoSize = true;
+            this.gameFilesLabel.Location = new System.Drawing.Point(23, 382);
+            this.gameFilesLabel.Name = "gameFilesLabel";
+            this.gameFilesLabel.Size = new System.Drawing.Size(118, 15);
+            this.gameFilesLabel.TabIndex = 17;
+            this.gameFilesLabel.Text = "(Optional) Misc Files:";
+            // 
+            // gameFilesButton
+            // 
+            this.gameFilesButton.Location = new System.Drawing.Point(607, 379);
+            this.gameFilesButton.Name = "gameFilesButton";
+            this.gameFilesButton.Size = new System.Drawing.Size(75, 23);
+            this.gameFilesButton.TabIndex = 16;
+            this.gameFilesButton.Text = "Browse";
+            this.gameFilesButton.UseVisualStyleBackColor = true;
+            this.gameFilesButton.Click += new System.EventHandler(this.gameFilesButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.gameFilesLabel);
+            this.Controls.Add(this.gameFilesButton);
+            this.Controls.Add(this.gameFilesTBox);
             this.Controls.Add(this.isoButton);
             this.Controls.Add(this.outputTBox);
             this.Controls.Add(this.isoLabel);
@@ -147,5 +179,8 @@
         private MenuStrip menuStrip1;
         private ToolStripMenuItem helpToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
+        private TextBox gameFilesTBox;
+        private Label gameFilesLabel;
+        private Button gameFilesButton;
     }
 }

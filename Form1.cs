@@ -9,8 +9,11 @@ namespace RandomizerPatchApp
     using System.Text;
     using System.Windows.Forms;
     using System.Diagnostics;
+
     public partial class Form1 : Form
     {
+        public static readonly GCR gcrInstance = new();
+
         public Form1()
         {
             InitializeComponent();
@@ -18,14 +21,11 @@ namespace RandomizerPatchApp
             Console.SetOut(writer);
         }
 
-        private void gCodeTbox_TextChanged(object sender, EventArgs e)
-        {
-
-        }
+        private void gCodeTbox_TextChanged(object sender, EventArgs e) { }
 
         private void PatchButton_Click(object sender, EventArgs e)
         {
-            bool patchStatus = PatchISO(isoTBox.Text);
+            bool patchStatus = PatchISO(isoTBox.Text, gameFilesTBox.Text);
             if (patchStatus)
             {
                 Console.WriteLine("Patching Completed!");
@@ -34,11 +34,9 @@ namespace RandomizerPatchApp
             {
                 Console.WriteLine("Patching Failed!");
             }
-            
         }
 
-
-        public static bool PatchISO(string isoPath)
+        public static bool PatchISO(string isoPath, string gameFilesPath)
         {
             if (isoPath == "")
             {
@@ -73,14 +71,14 @@ namespace RandomizerPatchApp
                     }
 
                     default:
-                        {
-                            Console.WriteLine("Loaded ISO is not a Twilight Princess ISO. Please check your file and try again.");
-                            return false;
-                        }
+                    {
+                        Console.WriteLine(
+                            "Loaded ISO is not a Twilight Princess ISO. Please check your file and try again."
+                        );
+                        return false;
+                    }
                 }
-
             }
-            string gameFiles = ".\\PatchFiles\\GameFiles";
             string randoFiles = ".\\PatchFiles\\RandoFiles\\";
             Process process = new Process();
             Console.WriteLine("Patching Seeds...");
@@ -92,90 +90,143 @@ namespace RandomizerPatchApp
             string tempISOPath = ".\\tempISO";
             Console.WriteLine("Extracting ISO...");
 
-            ExecuteCommand(".\\bin\\gcr.exe ", "--extract \"" + isoPath + "\" " + tempISOPath);
-            if(!Directory.Exists(tempISOPath))
+            string[] gcrArg = { "--extract", isoPath, tempISOPath };
+
+            RandomizerPatchApp.GCR.GCRMain(gcrArg);
+            if (!Directory.Exists(tempISOPath))
             {
                 Console.WriteLine("ERROR! ISO Extraction failed! Please check your files");
                 return false;
             }
             Console.WriteLine("Done.");
-
-            //Patch the DOL with the proper Gecko Code based on the game region.
-            Console.WriteLine("Patching dol with Gecko Code...");
-            string[] dirs = Directory.GetFiles(@randoFiles, "REL_Loader_V2_" + gameRegion + "*"); //get the gecko code file. They always start with REL_Loader
-            if (dirs.Length == 0)
+            try
             {
-                Console.WriteLine("No Gecko Code file found that matches your ISO region. Check your files and try again. File should be stored in .\\PatchFiles");
-                return false;
-            }
-            ExecuteCommand(".\\bin\\GeckoLoader-Master\\GeckoLoader.exe", "\"" + ".\\tempISO\\root\\&&systemdata\\Start.dol\" " + dirs[0] + " --dest " + ".\"\\tempISO\\root\\&&systemdata\\Start.dol\" --optimize");
-            Console.WriteLine("Successfully patched dol with Gecko Code!");
-
-            //Move all of the new game files over to the tempISO directory
-            string[] movableFolders = Directory.GetDirectories(gameFiles);
-            if (movableFolders.Length != 0)
-            {
-                Console.WriteLine("Copying new game files to game folder...");
-                foreach (string folder in movableFolders)
+                //Patch the DOL with the proper Gecko Code based on the game region.
+                Console.WriteLine("Patching dol with Gecko Code...");
+                string[] dirs = Directory.GetFiles(
+                    @randoFiles,
+                    "REL_Loader_V2_" + gameRegion + "*"
+                ); //get the gecko code file. They always start with REL_Loader
+                if (dirs.Length == 0)
                 {
-                    string gameFolder = folder.Substring(gameFiles.Length, (folder.Length - gameFiles.Length));
-                    gameFolder = tempISOPath + "\\root" + gameFolder;
-                    //Console.WriteLine(folder + " " + gameFolder);
-                    Console.WriteLine("Copied " + folder + " to game folder!");
-                    CopyDirectory(folder, gameFolder, true);
-
+                    throw new Exception(
+                        "No Gecko Code file found that matches your ISO region. Check your files and try again. File should be stored in .\\PatchFiles"
+                    );
                 }
-            }
+                ExecuteCommand(
+                    ".\\bin\\GeckoLoader-Master\\GeckoLoader.exe",
+                    "\""
+                        + ".\\tempISO\\root\\&&systemdata\\Start.dol\" "
+                        + dirs[0]
+                        + " --dest "
+                        + ".\"\\tempISO\\root\\&&systemdata\\Start.dol\" --optimize"
+                );
+                Console.WriteLine("Successfully patched dol with Gecko Code!");
 
-            //Move all of the rando files over to the tempISO dicrectory
-            movableFolders = Directory.GetDirectories(randoFiles);
-            if (movableFolders.Length != 0)
-            {
-                Console.WriteLine("Copying Randomizer files to game folder...");
-                foreach (string folder in movableFolders)
+                //Move all of the new game files over to the tempISO directory
+                if (gameFilesPath.Length != 0)
                 {
-                    string randoFolder = folder.Substring(randoFiles.Length, (folder.Length - randoFiles.Length));
-                    randoFolder = tempISOPath + "\\root" + randoFolder;
-                    //Console.WriteLine(folder + " " + gameFolder);
-                    Console.WriteLine("Copied " + folder + " to game folder!");
-                    CopyDirectory(folder, randoFolder, true);
-
+                    Console.WriteLine("Copying new game files to game folder...");
+                    string[] gameFiles = Directory.GetFiles(gameFilesPath);
+                    if (gameFiles.Length != 0)
+                    {
+                        foreach (string file in gameFiles)
+                        {
+                            string fileName = Path.GetFileName(file);
+                            Console.WriteLine("Copied " + file + " to game folder!");
+                            CopyFile(gameFilesPath, tempISOPath + "\\root", fileName);
+                        }
+                    }
+                    string[] gameFolders = Directory.GetDirectories(gameFilesPath);
+                    if (gameFolders.Length != 0)
+                    {
+                        foreach (string folder in gameFolders)
+                        {
+                            string gameFolder = folder.Substring(
+                                gameFilesPath.Length,
+                                (folder.Length - gameFilesPath.Length)
+                            );
+                            gameFolder = tempISOPath + "\\root" + gameFolder;
+                            //Console.WriteLine(folder + " " + gameFolder);
+                            Console.WriteLine("Copied " + folder + " to game folder!");
+                            CopyDirectory(folder, gameFolder, true);
+                        }
+                    }
                 }
-            }
 
-            //Re-pack the ISO
-            Console.WriteLine("Repacking the ISO...");
-            string newISOName = ("Twilight-Princess-Randomizer-" + DateTime.Now.ToString("HHmmss") + ".iso");
-            ExecuteCommand(".\\bin\\gcr.exe ", "--rebuild \"" + tempISOPath + "\\root\" " + newISOName + " --noGameTOC");
-            byte[] isoBytes = File.ReadAllBytes(newISOName); // read in the file as an array of bytes
-            if (isoBytes.Length == 0)
-            {
-                Console.WriteLine("Failed to re-pack the ISO. Check your file structure and re-try.");
+                //Move all of the rando files over to the tempISO dicrectory
+                string[] movableFolders = Directory.GetDirectories(randoFiles);
+                if (movableFolders.Length != 0)
+                {
+                    Console.WriteLine("Copying Randomizer files to game folder...");
+                    foreach (string folder in movableFolders)
+                    {
+                        string randoFolder = folder.Substring(
+                            randoFiles.Length,
+                            (folder.Length - randoFiles.Length)
+                        );
+                        randoFolder = tempISOPath + "\\root" + randoFolder;
+                        //Console.WriteLine(folder + " " + gameFolder);
+                        Console.WriteLine("Copied " + folder + " to game folder!");
+                        CopyDirectory(folder, randoFolder, true);
+                    }
+                }
+
+                //Re-pack the ISO
+                Console.WriteLine("Repacking the ISO...");
+                string newISOName = (
+                    "Twilight-Princess-Randomizer-" + DateTime.Now.ToString("HHmmss") + ".iso"
+                );
+
+                gcrArg = new string[]
+                {
+                    "--rebuild",
+                    tempISOPath + "\\root\\",
+                    newISOName,
+                    "--noGameTOC"
+                };
+
+                RandomizerPatchApp.GCR.GCRMain(gcrArg);
+                byte[] isoBytes = File.ReadAllBytes(newISOName); // read in the file as an array of bytes
+                if (isoBytes.Length == 0)
+                {
+                    throw new Exception(
+                        "Failed to re-pack the ISO. Check your file structure and re-try."
+                    );
+                }
                 Console.WriteLine("Cleaning Up...");
                 System.IO.Directory.Delete(tempISOPath, true); // delete the temp ISO directory once we are done with it.
-                return false;
-            }
-            Console.WriteLine("Cleaning Up...");
-            System.IO.Directory.Delete(tempISOPath, true); // delete the temp ISO directory once we are done with it.
-            //Delete any seed files patched into the ISO.
-            string[] seedFiles = Directory.GetFiles(randoFiles + "\\mod\\seed\\");
-            if (gameFiles.Length != 0)
-            {
+                //Delete any seed files patched into the ISO.
+                string[] seedFiles = Directory.GetFiles(randoFiles + "\\mod\\seed\\");
                 foreach (string file in seedFiles)
                 {
                     File.Delete(file); // Delete the seed file.
                 }
+
+                return true;
             }
-            
-            return true;
+            catch (Exception ex)
+            {
+                System.IO.Directory.Delete(tempISOPath, true); // delete the temp ISO directory once we are done with it.
+                //Delete any seed files patched into the ISO.
+                string[] seedFiles = Directory.GetFiles(randoFiles + "\\mod\\seed\\");
+                foreach (string file in seedFiles)
+                {
+                    File.Delete(file); // Delete the seed file.
+                }
+
+                return false;
+            }
         }
 
         static void PatchSeedFiles(string filesPath, string gameRegion)
         {
-            string[] gameFiles = Directory.GetFiles(filesPath + "\\_seeds\\");
+            string[] gameFiles = Directory.GetFiles(".\\_seeds\\");
             if (gameFiles.Length == 0)
             {
-                Console.WriteLine("No seeds found. Please check your files and directory. Seeds should be placed in .\\RandoFiles\\_seeds");
+                Console.WriteLine(
+                    "No seeds found. Please check your files and directory. Seeds should be placed in the .\\_seeds folder"
+                );
                 return;
             }
             foreach (string file in gameFiles)
@@ -190,9 +241,11 @@ namespace RandomizerPatchApp
                     {
                         fileName = fileName.Substring(0, 31); // File name cannot be more than 32 characters in length
                     }
-                    File.WriteAllBytes(filesPath + "\\" + gameRegion + "\\mod\\seed\\" + fileName, bytes); // create the new seed file
+                    File.WriteAllBytes(
+                        filesPath + "\\" + gameRegion + "\\mod\\seed\\" + fileName,
+                        bytes
+                    ); // create the new seed file
                 }
-
             }
         }
 
@@ -228,10 +281,7 @@ namespace RandomizerPatchApp
             }
         }
 
-        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
-        {
-
-        }
+        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e) { }
 
         private void isoButton_Click(object sender, EventArgs e)
         {
@@ -254,20 +304,18 @@ namespace RandomizerPatchApp
             var p = new Process
             {
                 StartInfo =
-                 {
-                     FileName = command,
-                     Arguments = commandArgs,
-                     CreateNoWindow = true
-                 }
+                {
+                    FileName = command,
+                    Arguments = commandArgs,
+                    CreateNoWindow = true
+                }
             };
             p.Start();
             p.WaitForExit();
         }
 
-
         private static void CopyFile(string sourcePath, string targetPath, string fileName)
         {
-
             // Use Path class to manipulate file and directory paths.
             string sourceFile = System.IO.Path.Combine(sourcePath, fileName);
             string destFile = System.IO.Path.Combine(targetPath, fileName);
@@ -349,9 +397,14 @@ namespace RandomizerPatchApp
             }
         }
 
-        private void isoLabel_Click(object sender, EventArgs e)
+        private void gameFilesButton_Click(object sender, EventArgs e)
         {
-
+            // Show the FolderBrowserDialog.
+            DialogResult result = folderBrowserDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                gameFilesTBox.Text = folderBrowserDialog1.SelectedPath;
+            }
         }
     }
 }
