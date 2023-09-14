@@ -101,28 +101,6 @@ namespace RandomizerPatchApp
             Console.WriteLine("Done.");
             try
             {
-                //Patch the DOL with the proper Gecko Code based on the game region.
-                Console.WriteLine("Patching dol with Gecko Code...");
-                string[] dirs = Directory.GetFiles(
-                    @randoFiles,
-                    "REL_Loader_V2_" + gameRegion + "*"
-                ); //get the gecko code file. They always start with REL_Loader
-                if (dirs.Length == 0)
-                {
-                    throw new Exception(
-                        "No Gecko Code file found that matches your ISO region. Check your files and try again. File should be stored in .\\PatchFiles"
-                    );
-                }
-                ExecuteCommand(
-                    ".\\bin\\GeckoLoader-Master\\GeckoLoader.exe",
-                    "\""
-                        + ".\\tempISO\\root\\&&systemdata\\Start.dol\" "
-                        + dirs[0]
-                        + " --dest "
-                        + ".\"\\tempISO\\root\\&&systemdata\\Start.dol\" --optimize"
-                );
-                Console.WriteLine("Successfully patched dol with Gecko Code!");
-
                 //Move all of the new game files over to the tempISO directory
                 if (gameFilesPath.Length != 0)
                 {
@@ -171,6 +149,28 @@ namespace RandomizerPatchApp
                         CopyDirectory(folder, randoFolder, true);
                     }
                 }
+
+                //Patch the DOL with the proper Gecko Code based on the game region.
+                Console.WriteLine("Patching dol with Gecko Code...");
+                string[] dirs = Directory.GetFiles(
+                    @randoFiles,
+                    "REL_Loader_V2_" + gameRegion + "*"
+                ); //get the gecko code file. They always start with REL_Loader
+                if (dirs.Length == 0)
+                {
+                    throw new Exception(
+                        "No Gecko Code file found that matches your ISO region. Check your files and try again. File should be stored in .\\PatchFiles"
+                    );
+                }
+                ExecuteCommand(
+                    ".\\bin\\GeckoLoader-Master\\GeckoLoader.exe",
+                    "\""
+                        + ".\\tempISO\\root\\&&systemdata\\Start.dol\" "
+                        + dirs[0]
+                        + " --dest "
+                        + ".\"\\tempISO\\root\\&&systemdata\\Start.dol\" --optimize"
+                );
+                Console.WriteLine("Successfully patched dol with Gecko Code!");
 
                 //Re-pack the ISO
                 Console.WriteLine("Repacking the ISO...");
